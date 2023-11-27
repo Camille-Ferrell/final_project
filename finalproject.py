@@ -20,10 +20,25 @@ class HolidaySong(Song):
     def __init__(self, title, artist, bpm):
         super().__init__(title, artist, bpm)
 
-def get_weather_data():
-    # Placeholder function to simulate fetching weather data from an API
-    # In a real application, you would use the Requests library to interact with a weather API.
-    return "sunny"  # Replace with actual weather data
+def get_weather_data(api_key: str = "4204310b04c096285fad8d4b5df1c49d", city: str = "Boston"):
+    base_url = "http://api.openweathermap.org/data/2.5/forecast"
+    params = {"q": city, "APPID": api_key}
+
+    try:
+        response = requests.get(base_url, params=params)
+        response.raise_for_status()  # Raise an exception for bad requests
+
+        # Assuming the API response contains JSON data
+        data = response.json()
+
+        # Extracting relevant weather information (replace with actual data structure from the API)
+        temperature = data["main"]["temp"]
+        condition = data["weather"][0]["description"]
+
+        return f"The weather in {city} is {condition} with a temperature of {temperature}°C."
+
+    except requests.exceptions.RequestException as e:
+        return f"Error fetching weather data: {e}"
 
 def get_calendar_date():
     return datetime.now().strftime("%Y-%m-%d")
@@ -48,9 +63,9 @@ class WeatherAnalyzer:
         self.weather_conditions = weather_conditions
 
     def analyze_weather(self):
-        if "sunny" in self.weather_conditions.lower():
+        if "clear" in self.weather_conditions.lower():
             return UpbeatSong("Sunny Song", "Artist", 120)
-        elif "cloudy" in self.weather_conditions.lower():
+        elif "cloud" in self.weather_conditions.lower():
             return SlowSong("Cloudy Song", "Artist", 80)
         else:
             return UpbeatSong("Default Song", "Artist", 100)
@@ -93,7 +108,9 @@ class SongRecommendation:
             return SlowSong("Low BPM Song", "Artist", bpm)
 
 # Example Usage
-weather_data = get_weather_data()
+api_key = "4204310b04c096285fad8d4b5df1c49d"
+city = "Boston"
+weather_data = get_weather_data(api_key, city)
 calendar_date = get_calendar_date()
 library = ["path/to/song1.mp3", "path/to/song2.mp3", "path/to/song3.mp3"]
 song_recommendation = SongRecommendation(library, weather_data, calendar_date)
