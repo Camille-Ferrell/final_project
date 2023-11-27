@@ -1,6 +1,7 @@
 import requests
 from datetime import datetime
 import librosa
+import csv
 
 class Song:
     def __init__(self, title, artist, bpm):
@@ -21,7 +22,7 @@ class HolidaySong(Song):
         super().__init__(title, artist, bpm)
 
 def get_weather_data(api_key: str = "4204310b04c096285fad8d4b5df1c49d", city: str = "Boston"):
-    base_url = "http://api.openweathermap.org/data/2.5/forecast"
+    base_url = "http://api.openweathermap.org/data/2.5/weather?q=boston,ma"
     params = {"q": city, "APPID": api_key}
 
     try:
@@ -51,12 +52,34 @@ def analyze_song_bpm(song_path):
     return bpm
 
 class MusicLibrary:
-    def __init__(self, library):
-        self.library = library
+    def __init__(self):
+        self.songs = []
+
+    def load_library_from_csv(self, file_path):
+        try:
+            with open(file_path, 'r') as csv_file:
+                csv_reader = csv.DictReader(csv_file)
+                for row in csv_reader:
+                    song = Song(
+                        title=row['song_name'],
+                        artist=row['artist'],
+                        bpm=int(row['bpm'])
+                    )
+                    self.songs.append(song)
+            print(f"Library loaded from {file_path}")
+        except FileNotFoundError:
+            print(f"File not found: {file_path}")
+        except Exception as e:
+            print(f"Error loading library: {e}")
 
     def analyze_song(self, song_path):
+        # Use Librosa to analyze the BPM of the song
         bpm = analyze_song_bpm(song_path)
         return bpm
+
+    def display_library(self):
+        for song in self.songs:
+            print(f"{song.title} by {song.artist} ({song.bpm} BPM)")
 
 class WeatherAnalyzer:
     def __init__(self, weather_conditions):
