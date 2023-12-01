@@ -2,6 +2,7 @@ import requests
 from datetime import datetime
 import librosa
 import csv
+import random
 
 class MusicLibrary:
     def __init__(self, songs):
@@ -70,24 +71,26 @@ class WeatherAnalyzer:
     def analyze_weather(self):
         city = self.get_user_input()
         weather_data = self.get_weather_data(city)
-        # Replace this with your logic based on weather condition
+        # Replace this with logic based on weather condition
         # Extracting relevant weather information
         temperature = int(weather_data.split('°')[0].split(':')[-1])
         condition = weather_data.split('is ')[1].split(' with')[0].lower()
 
-        #My logic based on weather conditions
+        matching_songs = []
+
         if "clear" in condition or "sunny" in condition:
             if temperature > 60:
-                return Song("Sunny and Warm Song", "Artist", 120)
+                matching_songs = [song for song in library if Song.bpm >= 120]
             else:
-                return Song("Sunny and Cool Song", "Artist", 110)
+                matching_songs = [song for song in library if 110 <= Song.bpm < 120]
         elif "partly cloudy" in condition or "partly sunny" in condition:
-            return Song("Partly Cloudy Song", "Artist", 100)
+            matching_songs = [song for song in library if 90 <= Song.bpm <= 110]
         elif "cloudy" in condition or "rainy" in condition or "foggy" in condition or "snowy" in condition:
-            return Song("Rainy Day Song", "Artist", 89)
-        else:
-            # Default case, return a default song
-            return Song("Default Song", "Artist", 100)
+            matching_songs = [song for song in library if Song.bpm <= 89]
+
+        # Return a random song from the matching songs
+        if matching_songs:
+            return random.choice(matching_songs)
 
 class CalendarAnalyzer:
     def __init__(self, calendar_date):
@@ -98,13 +101,21 @@ class CalendarAnalyzer:
         return datetime.now().strftime("%Y-%m-%d")
 
     def analyze_date(self):
-        # Check for specific holidays and return a HolidaySong
-        if "12-25" in self.calendar_date:
-            return Song("Christmas Song", "Artist", 90)
-        elif "10-31" in self.calendar_date:
-            return Song("Halloween Song", "Artist", 100)
-        else:
-            return None
+        # Check for specific holidays and return a list of matching songs
+        matching_songs = []
+
+        if "12-15" <= self.calendar_date <= "12-30":
+            matching_songs = [song for song in library if song.holiday_association == " Christmas"]
+        elif self.calendar_date == "10-31":
+            matching_songs = [song for song in library if song.holiday_association == " Halloween"]
+        elif self.calendar_date == "02-14":
+            matching_songs = [song for song in library if song.holiday_association == " Valentine's Day"]
+        elif self.calendar_date == "04":
+            matching_songs = [song for song in library if song.holiday_association == " Fourth of July"]
+
+        # Return a random song from the matching songs
+        if matching_songs:
+            return random.choice(matching_songs)
 
 class SongRecommendation:
     def __init__(self, library, weather_analyzer, calendar_analyzer):
