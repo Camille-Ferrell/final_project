@@ -34,23 +34,23 @@ class MusicLibrary:
             print(f"File not found: {file_path}")
         except Exception as e:
             print(f"Error loading library: {e}") 
-        return cls(library)
+        return list(library)
 
     def display_library(self):
         for song in self.songs:
-            print(f"{Song.title} by {Song.artist} ({Song.bpm} BPM)")
+            print(f"{song.title} by {song.artist} ({song.bpm} BPM)")
 
 class Analyzer:
     def __init__(self):
-        pass
+        return 
 
     def get_random_song(self, library, bpm_range=None, holiday_association=None):
         matching_songs = []
 
         if bpm_range:
-            matching_songs = [song for song in library if bpm_range[0] <= Song.bpm <= bpm_range[1]]
+            matching_songs = [song for song in library if bpm_range[0] <= song.bpm <= bpm_range[1]]
         elif holiday_association:
-            matching_songs = [song for song in library if Song.holiday_association == holiday_association]
+            matching_songs = [song for song in library if song.holiday_association == holiday_association]
 
         # Return a random song from the matching songs
         if matching_songs:
@@ -77,10 +77,10 @@ class WeatherAnalyzer(Analyzer):
             data = response.json()
 
             # Extracting relevant weather information (replace with actual data structure from the API)
-            temperature = data["main"]["temp"]
+            temperature = float(data["main"]["temp"])
             condition = data["weather"][0]["description"]
 
-            return f"The weather in {self.city} is {condition} with a temperature of {temperature}°C."
+            return f"The weather in {city} is {condition} with a temperature of {temperature}°F."
 
         except requests.exceptions.RequestException as e:
             return f"Error fetching weather data: {e}"
@@ -90,22 +90,25 @@ class WeatherAnalyzer(Analyzer):
         weather_data = self.get_weather_data(city)
 
         # Extracting relevant weather information
-        temperature = int(weather_data.split('°')[0].split(':')[-1])
+        temperature = (weather_data.split('°')[0].split(':')[-1])
         condition = weather_data.split('is ')[1].split(' with')[0].lower()
-
-        bpm_range = None
-        if "clear" in condition or "sunny" in condition:
+        matching_songs = []
+        if "Clear sky" in condition or "sunny" in condition:
             if temperature > 60:
-                bpm_range = (120, float('inf'))
+                matching_songs = [song for song in library if song.bpm >= 120]
             else:
-                bpm_range = (110, 120)
-        elif "partly cloudy" in condition or "partly sunny" in condition:
-            bpm_range = (90, 110)
-        elif "cloudy" in condition or "rainy" in condition or "foggy" in condition or "snowy" in condition:
-            bpm_range = (float('-inf'), 89)
+                matching_songs = [song for song in library if 110 <= song.bpm < 120]
+        elif "Broken clouds" in condition or "Partly sunny" in condition:
+            matching_songs = [song for song in library if 90 <= song.bpm <= 110]
+        elif "Cloudy" in condition or "Light rain" in condition or "Foggy" in condition or "Snowy" in condition or "Overcast clouds":
+            matching_songs = [song for song in library if song.bpm <= 89]
 
-        return self.get_random_song(library, bpm_range=bpm_range)
-
+        # Return a random song from the matching songs
+        if matching_songs:
+            return random.choice(matching_songs)
+        else:
+            return matching_songs
+        
 class CalendarAnalyzer(Analyzer):
     def __init__(self, calendar_date):
         super().__init__()
@@ -115,34 +118,33 @@ class CalendarAnalyzer(Analyzer):
     def get_calendar_date():
         return datetime.now().strftime("%Y-%m-%d")
 
-def analyze_date(self, library):
+    def analyze_date(self, library):
         matching_songs = []
 
-        if "12-15" <= calendar_date <= "12-30":
-            matching_songs = [song for song in library if Song.holiday_association == " Christmas"]
-        elif calendar_date == "10-31":
-            matching_songs = [song for song in library if Song.holiday_association == " Halloween"]
-        elif calendar_date == "02-14":
-            matching_songs = [song for song in library if Song.holiday_association == " Valentine's Day"]
-        elif calendar_date == "04":
-            matching_songs = [song for song in library if Song.holiday_association == " Fourth of July"]
+        if "12-15" <= self.calendar_date <= "04-30":
+            matching_songs = [song for song in library if song.holiday_association == " Christmas"]
+        elif self.calendar_date == "10-31":
+            matching_songs = [song for song in library if song.holiday_association == " Halloween"]
+        elif self.calendar_date == "02-14":
+            matching_songs = [song for song in library if song.holiday_association == " Valentine's Day"]
+        elif self.calendar_date == "04":
+            matching_songs = [song for song in library if song.holiday_association == " Fourth of July"]
 
         # Return a random song from the matching songs
         return matching_songs
             
-class SongRecommendation(Song):
+class SongRecommendation:
     def __init__(self, library, weather_analyzer, calendar_analyzer):
-        super().__init__()
         self.music_library = library
         self.weather_analyzer = weather_analyzer
         self.calendar_analyzer = calendar_analyzer
 
     def recommend_song(self):
         # Analyze weather conditions
-        weather_song = self.weather_analyzer(self.music_library)
+        weather_song = self.weather_analyzer.analyze_weather(library)
 
         # Analyze calendar date
-        calendar_songs = self.calendar_analyzer(self.music_library)
+        calendar_songs = self.calendar_analyzer.analyze_date(library)
 
         # Choose the final recommended song based on conditions
         if calendar_songs:
@@ -158,5 +160,5 @@ calendar_date = CalendarAnalyzer.get_calendar_date()
 library = MusicLibrary.load_library_from_csv(file_path)
 song_recommendation = SongRecommendation(library, weather_analyzer, CalendarAnalyzer(calendar_date))
 recommended_song = song_recommendation.recommend_song()
-print(f"Recommended Song: {recommended_song.title} by {recommended_song.artist} with BPM: {recommended_song.bpm}")
+print(f"Recommended Song of the Day: {recommended_song.title} by {recommended_song.artist} with BPM: {recommended_song.bpm}")
 
