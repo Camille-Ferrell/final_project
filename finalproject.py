@@ -1,5 +1,6 @@
 import requests
 from datetime import datetime
+from datetime import date
 import librosa
 import csv
 import random
@@ -93,14 +94,11 @@ class WeatherAnalyzer(Analyzer):
         temperature = (weather_data.split('°')[0].split(':')[-1])
         condition = weather_data.split('is ')[1].split(' with')[0].lower()
         matching_songs = []
-        if "Clear sky" in condition or "sunny" in condition:
-            if temperature > 60:
-                matching_songs = [song for song in library if song.bpm >= 120]
-            else:
-                matching_songs = [song for song in library if 110 <= song.bpm < 120]
-        elif "Broken clouds" in condition or "Partly sunny" in condition:
+        if "clear sky" in condition or "sunny" in condition or "few clouds" in condition:
+            matching_songs = [song for song in library if song.bpm >= 110]
+        elif "broken clouds" in condition or "partly sunny" in condition:
             matching_songs = [song for song in library if 90 <= song.bpm <= 110]
-        elif "Cloudy" in condition or "Light rain" in condition or "Foggy" in condition or "Snowy" in condition or "Overcast clouds":
+        elif "cloudy" in condition or "light rain" in condition or "foggy" in condition or "snowy" in condition or "moderate rain" in condition or "overcast clouds":
             matching_songs = [song for song in library if song.bpm <= 89]
 
         # Return a random song from the matching songs
@@ -117,19 +115,22 @@ class CalendarAnalyzer(Analyzer):
     @staticmethod
     def get_calendar_date():
         return datetime.now().strftime("%Y-%m-%d")
-
+    
     def analyze_date(self, library):
         matching_songs = []
-
-        if "12-15" <= self.calendar_date <= "04-30":
+        #calendar_date= datetime.now().strftime("%Y-%m-%d")
+        calendar_date= date.today()
+        
+        if date(2023,12,1) <= calendar_date <= date(2023,12,30):
             matching_songs = [song for song in library if song.holiday_association == " Christmas"]
-        elif self.calendar_date == "10-31":
+        elif calendar_date == date(24,10,31):
             matching_songs = [song for song in library if song.holiday_association == " Halloween"]
-        elif self.calendar_date == "02-14":
+        elif calendar_date == date(24,2,14):
             matching_songs = [song for song in library if song.holiday_association == " Valentine's Day"]
-        elif self.calendar_date == "04":
+        elif calendar_date == date(24,7,4):
             matching_songs = [song for song in library if song.holiday_association == " Fourth of July"]
-
+        else:
+            pass
         # Return a random song from the matching songs
         return matching_songs
             
@@ -160,5 +161,5 @@ calendar_date = CalendarAnalyzer.get_calendar_date()
 library = MusicLibrary.load_library_from_csv(file_path)
 song_recommendation = SongRecommendation(library, weather_analyzer, CalendarAnalyzer(calendar_date))
 recommended_song = song_recommendation.recommend_song()
-print(f"Recommended Song of the Day: {recommended_song.title} by {recommended_song.artist} with BPM: {recommended_song.bpm}")
+print(f"Recommended Song of the Day: {recommended_song.title} by{recommended_song.artist} with BPM: {recommended_song.bpm} with Holiday Association:{recommended_song.holiday_association}, Link to song: ")
 
