@@ -161,5 +161,5 @@ calendar_date = CalendarAnalyzer.get_calendar_date()
 library = MusicLibrary.load_library_from_csv(file_path)
 song_recommendation = SongRecommendation(library, weather_analyzer, CalendarAnalyzer(calendar_date))
 recommended_song = song_recommendation.recommend_song()
-print(f"Recommended Song of the Day: {recommended_song.title} by{recommended_song.artist} with BPM: {recommended_song.bpm} with Holiday Association:{recommended_song.holiday_association}, Link to song: ")
+print(f"Recommended Song of the Day: {recommended_song.title} by{recommended_song.artist} with BPM: {recommended_song.bpm} with Holiday Association:{recommended_song.holiday_association} ")
 
