@@ -1,7 +1,6 @@
 import requests
 from datetime import datetime
 from datetime import date
-import librosa
 import csv
 import random
 
