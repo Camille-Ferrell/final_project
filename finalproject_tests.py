@@ -28,9 +28,7 @@ class TestMusicLibrary(unittest.TestCase):
 
     def test_load_library_from_csv(self):
         # Creating a temporary CSV file for testing
-        csv_content = """Song, Artist(s), BPM, Holiday Association
-Prom, SZA, 120, No Association
-"""
+        csv_content = """Song, Artist(s), BPM, Holiday Association Prom, SZA, 120, No Association"""
         with patch("builtins.open", open(read_data=csv_content)) as mock_file:
             library = MusicLibrary.load_library_from_csv("test.csv")
 
