@@ -120,7 +120,7 @@ class CalendarAnalyzer(Analyzer):
         #calendar_date= datetime.now().strftime("%Y-%m-%d")
         calendar_date= date.today()
         
-        if date(2023,12,1) <= calendar_date <= date(2023,12,30):
+        if date(2024,12,1) <= calendar_date <= date(2024,12,30):
             matching_songs = [song for song in library if song.holiday_association == " Christmas"]
         elif calendar_date == date(24,10,31):
             matching_songs = [song for song in library if song.holiday_association == " Halloween"]
@@ -152,7 +152,7 @@ class SongRecommendation:
         else:
             return weather_song
 
-# Example Usage
+# Usage
 api_key = "4204310b04c096285fad8d4b5df1c49d"
 file_path = "Music_Library.csv"
 weather_analyzer = WeatherAnalyzer(api_key)
